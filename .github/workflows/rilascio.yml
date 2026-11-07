@@ -1,13 +1,15 @@
 name: Rilascio
 
-# Si avvia creando un tag di versione, ad esempio:
-#   git tag v0.2.0 && git push origin v0.2.0
+# Si avvia pubblicando una release su GitHub con un tag di versione (es. v0.2.0):
+#   - dal sito: Releases → Draft a new release → tag v0.2.0 → Publish release
+#   - dal terminale: gh release create v0.2.0 --generate-notes
 # Il numero deve coincidere con VERSIONE in app/versione.py.
+# I pacchetti vengono aggiunti alla release dopo circa 20 minuti.
 # Si può anche avviare a mano (scheda Actions) per provare la build senza pubblicare.
 
 on:
-  push:
-    tags: ["v*"]
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
@@ -97,5 +99,6 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           files: rilascio/*
-          generate_release_notes: true
+          # aggiunge in fondo alle note della release la guida "Quale file scaricare?"
           body_path: .github/NOTE_RILASCIO.md
+          append_body: true
