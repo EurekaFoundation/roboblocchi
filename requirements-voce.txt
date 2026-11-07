@@ -1,0 +1,4 @@
+# Facoltativi: ascolto (riconoscimento vocale) e voce neurale Piper
+faster-whisper>=1.0
+sounddevice>=0.4
+piper-tts>=1.2

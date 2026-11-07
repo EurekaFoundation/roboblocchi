@@ -1,0 +1,57 @@
+name: 🐞 Segnalazione di un problema
+description: Qualcosa non funziona come dovrebbe
+labels: ["problema"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Grazie per la segnalazione! Più dettagli ci dai, più in fretta riusciamo a risolvere.
+        **Non inserire dati personali** (nomi di studenti, foto della classe…).
+  - type: textarea
+    id: cosa
+    attributes:
+      label: Cosa è successo?
+      description: Descrivi il problema e cosa ti aspettavi che succedesse.
+    validations:
+      required: true
+  - type: textarea
+    id: passi
+    attributes:
+      label: Come riprodurlo
+      description: I passi per far ricomparire il problema. Se riguarda un programma, puoi allegare il file .robo.
+      placeholder: |
+        1. Apro la sfida "Segui la linea"
+        2. Uso il blocco …
+        3. Premo Esegui e …
+    validations:
+      required: true
+  - type: textarea
+    id: console
+    attributes:
+      label: Messaggi nella console
+      description: Copia qui eventuali messaggi in rosso della console dell'app.
+      render: text
+  - type: input
+    id: versione
+    attributes:
+      label: Versione di RoboBlocchi
+      placeholder: es. 0.2.0 (o "codice sorgente")
+    validations:
+      required: true
+  - type: dropdown
+    id: sistema
+    attributes:
+      label: Sistema operativo
+      options: [Windows 11, Windows 10, macOS, Linux, Altro]
+    validations:
+      required: true
+  - type: dropdown
+    id: robot
+    attributes:
+      label: Robot
+      options: [Robot virtuale, Robot vero in rete, Non rilevante]
+  - type: input
+    id: modello
+    attributes:
+      label: Modello di IA (se il problema riguarda l'IA)
+      placeholder: es. gemma3:4b

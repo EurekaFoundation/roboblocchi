@@ -1,0 +1,45 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  python:
+    name: Python ${{ matrix.python }} · ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.10", "3.12", "3.13"]
+        exclude:
+          - os: windows-latest
+            python: "3.10"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - run: python -m pytest -q
+
+  blocchi:
+    name: Blocchi (generatori Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm test
+      - name: La versione di Blockly inclusa coincide con quella dei test
+        run: |
+          atteso=$(node -p "require('./package.json').devDependencies.blockly")
+          installato=$(node -p "require('blockly/package.json').version")
+          echo "package.json: $atteso, installato: $installato"
+          test "$atteso" = "$installato"
+          cmp node_modules/blockly/blockly_compressed.js app/ui/vendor/blockly/blockly_compressed.js

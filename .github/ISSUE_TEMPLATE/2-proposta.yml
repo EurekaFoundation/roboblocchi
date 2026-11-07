@@ -1,0 +1,28 @@
+name: 💡 Proposta di una funzione
+description: Un nuovo blocco, un miglioramento, un'idea
+labels: ["proposta"]
+body:
+  - type: textarea
+    id: bisogno
+    attributes:
+      label: Che cosa vorresti fare?
+      description: Parti dal bisogno, non dalla soluzione. Es. "vorrei che il robot riconoscesse le frecce disegnate su un foglio".
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Come immagini la soluzione?
+      description: Un blocco nuovo? Come si chiamerebbe? Che cosa farebbe?
+  - type: textarea
+    id: scuola
+    attributes:
+      label: In quale attività la useresti?
+      description: Età degli studenti, materia, obiettivo didattico.
+  - type: checkboxes
+    id: aiuto
+    attributes:
+      label: Vuoi partecipare?
+      options:
+        - label: Posso provarla in classe
+        - label: Posso aiutare a scriverla

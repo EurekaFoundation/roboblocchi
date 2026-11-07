@@ -1,0 +1,101 @@
+name: Rilascio
+
+# Si avvia creando un tag di versione, ad esempio:
+#   git tag v0.2.0 && git push origin v0.2.0
+# Il numero deve coincidere con VERSIONE in app/versione.py.
+# Si può anche avviare a mano (scheda Actions) per provare la build senza pubblicare.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: ${{ matrix.os }} · ${{ matrix.variante }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-22.04]
+        variante: [completo, base]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Controllo versione
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          versione=$(python -c "import sys; sys.path.insert(0, 'app'); from versione import VERSIONE; print(VERSIONE)")
+          test "v$versione" = "${GITHUB_REF_NAME}" || { echo "Il tag ${GITHUB_REF_NAME} non coincide con la versione $versione"; exit 1; }
+
+      - name: Dipendenze di sistema (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libportaudio2 libegl1 libxkbcommon-x11-0
+
+      - name: Dipendenze Python
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+          if [ "$RUNNER_OS" = "Linux" ]; then pip install "pywebview[qt]"; fi
+          if [ "${{ matrix.variante }}" = "completo" ]; then pip install -r requirements-voce.txt; fi
+
+      - name: Inno Setup (Windows)
+        if: runner.os == 'Windows'
+        run: choco install innosetup --no-progress -y
+
+      - name: Build
+        shell: bash
+        run: python distribuzione/costruisci.py ${{ matrix.variante == 'base' && '--base' || '' }}
+
+      - name: Verifica dell'app costruita
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            dist/RoboBlocchi.app/Contents/MacOS/RoboBlocchi --verifica
+          else
+            QT_QPA_PLATFORM=offscreen dist/RoboBlocchi/RoboBlocchi --verifica
+          fi
+
+      - name: Verifica dell'app costruita (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath dist\RoboBlocchi\RoboBlocchi.exe -ArgumentList '--verifica' -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Verifica non superata (codice $($p.ExitCode))" }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RoboBlocchi-${{ runner.os }}-${{ matrix.variante }}
+          path: |
+            dist/*.exe
+            dist/*.zip
+            dist/*.tar.gz
+          if-no-files-found: error
+
+  pubblica:
+    name: Pubblica la release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: rilascio
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: rilascio/*
+          generate_release_notes: true
+          body_path: .github/NOTE_RILASCIO.md

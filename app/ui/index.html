@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RoboBlocchi</title>
+  <link rel="stylesheet" href="stile.css">
+  <script src="vendor/blockly/blockly_compressed.js"></script>
+  <script src="vendor/blockly/blocks_compressed.js"></script>
+  <script src="vendor/blockly/python_compressed.js"></script>
+  <script src="vendor/blockly/msg/it.js"></script>
+  <script src="blocchi.js"></script>
+  <script src="simulatore.js"></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="barra">
+    <div class="marchio">
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="28" height="28"><rect x="5" y="9" width="22" height="16" rx="5" fill="currentColor"/><circle cx="12" cy="17" r="2.6" fill="var(--barra)"/><circle cx="20" cy="17" r="2.6" fill="var(--barra)"/><rect x="15" y="3" width="2" height="6" fill="currentColor"/><circle cx="16" cy="3" r="2" fill="currentColor"/></svg>
+      </span>
+      <strong>RoboBlocchi</strong>
+      <span id="nome-progetto" class="progetto">nuovo progetto</span>
+    </div>
+    <div class="comandi">
+      <button id="btn-apri" class="secondario" title="Apri un progetto">Apri</button>
+      <button id="btn-salva" class="secondario" title="Salva il progetto">Salva</button>
+      <button id="btn-impostazioni" class="secondario" title="Impostazioni">⚙ Impostazioni</button>
+      <span class="separatore"></span>
+      <button id="btn-passo" class="passo" title="Esegui un blocco alla volta">⏭ Passo</button>
+      <button id="btn-ferma" class="ferma" disabled>■ Ferma</button>
+      <button id="btn-esegui" class="esegui">▶ Esegui</button>
+    </div>
+  </header>
+
+  <main class="area">
+    <div id="blockly"></div>
+    <aside class="laterale">
+      <section class="pannello schede">
+        <nav class="linguette" role="tablist">
+          <button role="tab" data-scheda="sim" class="attiva">🤖 Robot virtuale</button>
+          <button role="tab" data-scheda="cam">📷 Telecamera</button>
+          <button role="tab" data-scheda="codice">🐍 Codice Python</button>
+        </nav>
+
+        <div class="scheda attiva" id="scheda-sim">
+          <div class="strumenti">
+            <select id="sel-mondo" title="Mondo"></select>
+            <button id="btn-riposiziona" class="mini" title="Riporta il robot alla partenza">↺ Partenza</button>
+            <button id="btn-sfide" class="mini evidente">🏁 Sfide</button>
+          </div>
+          <div id="banner-sfida" class="banner" hidden>
+            <div class="banner-testa">
+              <strong id="sfida-titolo"></strong>
+              <button id="btn-esci-sfida" class="mini" title="Torna al gioco libero">✕ esci</button>
+            </div>
+            <p id="sfida-testo"></p>
+            <p id="sfida-suggerimento" class="suggerimento"></p>
+            <p id="sfida-esito" class="esito" hidden></p>
+          </div>
+          <div class="contenitore-sim"><canvas id="canvas-sim"></canvas></div>
+          <p class="nota">Griglia: 10 cm · le foto dell'IA arrivano dalla webcam del PC</p>
+        </div>
+
+        <div class="scheda" id="scheda-cam">
+          <div class="contenitore-cam">
+            <img id="img-cam" alt="Anteprima della telecamera">
+            <p id="stato-cam" class="nota">La telecamera si accende quando apri questa scheda.</p>
+          </div>
+        </div>
+
+        <div class="scheda" id="scheda-codice">
+          <div class="strumenti">
+            <span class="nota">Generato dai blocchi, in tempo reale</span>
+            <button id="btn-esporta" class="mini">⬇ Esporta .py</button>
+          </div>
+          <pre id="codice"></pre>
+        </div>
+      </section>
+
+      <section class="pannello console">
+        <h2>Console <button id="btn-pulisci" class="mini">pulisci</button></h2>
+        <div id="log" aria-live="polite"></div>
+      </section>
+      <div id="stato" class="stato">Modalità: …</div>
+    </aside>
+  </main>
+
+  <dialog id="dlg-sfide">
+    <div class="modulo">
+      <h2>Sfide</h2>
+      <p class="nota">Scegli una sfida: il robot virtuale verifica da solo se l'hai superata.</p>
+      <div id="elenco-sfide" class="elenco-sfide"></div>
+      <div class="riga fine"><button id="btn-chiudi-sfide" class="secondario">Chiudi</button></div>
+    </div>
+  </dialog>
+
+  <dialog id="dlg-impostazioni">
+    <form method="dialog" class="modulo" id="modulo-impostazioni">
+      <h2>Impostazioni</h2>
+      <fieldset>
+        <legend>Intelligenza artificiale (Ollama)</legend>
+        <label>Indirizzo di Ollama <input name="url_ollama" required></label>
+        <label>Modello con visione <input name="modello" required list="lista-modelli"></label>
+        <datalist id="lista-modelli"></datalist>
+        <div class="riga">
+          <button type="button" id="btn-verifica" class="secondario">Verifica collegamento</button>
+          <span id="esito-verifica" class="esito-breve"></span>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Robot</legend>
+        <label>Modalità
+          <select name="modalita_robot">
+            <option value="simulato">Robot virtuale (foto dalla webcam del PC)</option>
+            <option value="rete">Robot vero sulla rete locale</option>
+          </select>
+        </label>
+        <label>Indirizzo del robot <input name="indirizzo_robot"></label>
+        <label>Numero webcam del PC <input name="indice_webcam" type="number" min="0" max="9"></label>
+      </fieldset>
+      <fieldset>
+        <legend>Voce e ascolto</legend>
+        <label class="casella"><input type="checkbox" name="voce_attiva"> Il blocco «di'» parla ad alta voce</label>
+        <label>Motore della voce
+          <select name="motore_voce">
+            <option value="sistema">Voce del sistema operativo</option>
+            <option value="piper">Piper (voce neurale, più naturale)</option>
+          </select>
+        </label>
+        <label>Modello Piper (.onnx) <input name="modello_piper" placeholder="es. C:\voci\it_IT-paola-medium.onnx"></label>
+        <div class="riga">
+          <button type="button" id="btn-prova-voce" class="secondario">Prova la voce</button>
+          <span id="esito-voce" class="esito-breve"></span>
+        </div>
+        <label>Riconoscimento vocale (Whisper)
+          <select name="modello_whisper">
+            <option value="tiny">tiny — velocissimo, meno preciso</option>
+            <option value="base">base — consigliato</option>
+            <option value="small">small — più preciso, più lento</option>
+          </select>
+        </label>
+      </fieldset>
+      <fieldset>
+        <legend>Interfaccia</legend>
+        <label>Blocchi disponibili
+          <select name="interfaccia">
+            <option value="completa">Completa</option>
+            <option value="semplice">Semplice (per i più piccoli: meno blocchi, più grandi)</option>
+          </select>
+        </label>
+      </fieldset>
+      <div class="riga fine">
+        <button value="annulla" class="secondario" formnovalidate>Annulla</button>
+        <button value="salva" class="esegui">Salva</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

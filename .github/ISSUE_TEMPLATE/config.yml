@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Problema di sicurezza
+    url: https://github.com/EurekaFoundation/roboblocchi/security/advisories/new
+    about: Le vulnerabilità vanno segnalate in privato, non con una issue pubblica.

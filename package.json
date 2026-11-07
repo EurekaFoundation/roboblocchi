@@ -1,0 +1,12 @@
+{
+  "name": "roboblocchi",
+  "private": true,
+  "description": "Strumenti di sviluppo per i blocchi di RoboBlocchi (test dei generatori Python)",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "devDependencies": {
+    "blockly": "13.4.0"
+  }
+}

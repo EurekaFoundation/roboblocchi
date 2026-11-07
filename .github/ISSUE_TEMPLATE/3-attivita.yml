@@ -1,0 +1,46 @@
+name: 🏫 Attività didattica
+description: Proponi o condividi una scheda di attività, una sfida o un'esperienza in classe
+labels: ["didattica"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Le attività condivise diventano schede che ogni docente può usare. Saranno pubblicate con licenza **CC BY-SA 4.0**.
+  - type: input
+    id: titolo
+    attributes:
+      label: Titolo dell'attività
+    validations:
+      required: true
+  - type: dropdown
+    id: livello
+    attributes:
+      label: Ordine di scuola
+      multiple: true
+      options: [Primaria, Secondaria di primo grado, Secondaria di secondo grado, Formazione docenti]
+    validations:
+      required: true
+  - type: input
+    id: durata
+    attributes:
+      label: Durata
+      placeholder: es. 2 ore
+  - type: textarea
+    id: obiettivi
+    attributes:
+      label: Obiettivi
+      description: Cosa imparano gli studenti (concetti di programmazione, di IA, di robotica…)
+    validations:
+      required: true
+  - type: textarea
+    id: svolgimento
+    attributes:
+      label: Svolgimento
+      description: Le fasi dell'attività. Puoi allegare file .robo, foto del materiale (senza studenti riconoscibili) e schede.
+    validations:
+      required: true
+  - type: textarea
+    id: com-e-andata
+    attributes:
+      label: Com'è andata in classe?
+      description: Facoltativo, ma preziosissimo — cosa ha funzionato, cosa no, cosa cambieresti.
