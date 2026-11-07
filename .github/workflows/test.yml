@@ -39,7 +39,7 @@ jobs:
       - name: La versione di Blockly inclusa coincide con quella dei test
         run: |
           atteso=$(node -p "require('./package.json').devDependencies.blockly")
-          installato=$(node -p "require('blockly/package.json').version")
+          installato=$(node -p "JSON.parse(require('fs').readFileSync('node_modules/blockly/package.json', 'utf8')).version")
           echo "package.json: $atteso, installato: $installato"
           test "$atteso" = "$installato"
           cmp node_modules/blockly/blockly_compressed.js app/ui/vendor/blockly/blockly_compressed.js
